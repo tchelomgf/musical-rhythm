@@ -7,6 +7,7 @@ input.onButtonPressed(Button.B, function () {
 })
 let num = 0
 let mic = 0
+let micold = 0
 let max = 0
 let strip: neopixel.Strip = null
 let temp = 0
@@ -30,7 +31,12 @@ basic.forever(function () {
 basic.forever(function () {
     pins.analogSetPitchPin(AnalogPin.P1)
     pins.analogPitch(1000, 0)
+    micold = mic
     mic = Math.map(pins.analogReadPin(AnalogPin.P1), 0, 128, 0, 24)
+    // filter
+    if (micold < 2 && mic > 12 && mic < 14) {
+        mic = 0
+    }
     strip.clear()
     while (num < mic && num < 23) {
         strip.setPixelColor(num, neopixel.colors(NeoPixelColors.Blue))
