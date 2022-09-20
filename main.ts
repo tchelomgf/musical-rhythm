@@ -2,9 +2,7 @@ input.onButtonPressed(Button.B, function () {
     peak = 0
     maxlevel = 0
     run = false
-    pins.setPull(DigitalPin.P2, PinPullMode.PullNone)
     strip.clear()
-    pins.digitalWritePin(DigitalPin.P2, 0)
     strip.show()
 })
 let peakcount = 0
@@ -17,10 +15,9 @@ let maxlevel = 0
 let peak = 0
 let strip: neopixel.Strip = null
 let temp = 0
-pins.setPull(DigitalPin.P2, PinPullMode.PullNone)
-pins.setPull(DigitalPin.P1, PinPullMode.PullNone)
+let color = NeoPixelColors.Blue
 strip = neopixel.create(DigitalPin.P2, 24, NeoPixelMode.RGB)
-strip.setPixelColor(0, neopixel.colors(NeoPixelColors.Blue))
+strip.setPixelColor(0, color)
 strip.setBrightness(50)
 strip.show()
 basic.forever(function () {
@@ -28,8 +25,9 @@ basic.forever(function () {
         level = input.soundLevel()
         if (maxlevel < level) {
             maxlevel = level
-        } else if (minlevel > level) {
+        } else if (minlevel >= level) {
             minlevel = level
+            color = neopixel.rgb(randint(0,255), randint(0,255), randint(0,225))
         }
         led.plotBarGraph(
         level,
@@ -38,11 +36,11 @@ basic.forever(function () {
         mic = Math.map(level, minlevel, maxlevel, 0, 24)
         strip.clear()
         while (num < mic && num < 23) {
-            strip.setPixelColor(num, neopixel.colors(NeoPixelColors.Blue))
-            strip.setBrightness(50)
-            strip.show()
+            strip.setPixelColor(num, color)
             num = num + 1
         }
+        strip.setBrightness((mic * 2) + 20)
+
         if (peak < num) {
             peak = num
             peakcount = 20
@@ -60,6 +58,8 @@ loops.everyInterval(100, function () {
     if (run) {
         if (peakcount > 0) {
             peakcount = peakcount - 1
+        } else if (peakcount == 1) {
+            minlevel = minlevel + 1
         } else {
             if (peak > 0) {
                 peak = peak - 1
